@@ -412,6 +412,14 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
         key={community}
         variant={selectedCommunities.includes(community) ? "default" : "outline"}
         className="cursor-pointer transition-all hover:opacity-80"
+        style={selectedCommunities.includes(community) ? {
+          backgroundColor: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%, 0.1)`,
+          color: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`,
+          borderColor: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`
+        } : {
+          borderColor: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`,
+          color: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`
+        }}
         onClick={() => {
           if (selectedCommunities.includes(community)) {
             setSelectedCommunities(selectedCommunities.filter(c => c !== community));
@@ -490,92 +498,6 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
             </div>
           </div>
 
-          {/* 已選擇的行政區標籤 */}
-          {selectedDistricts.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-              {selectedDistricts.map((district, index) => (
-                <div key={district} className="flex items-center gap-1">
-                  <Badge
-                    variant="secondary"
-                    className="text-sm py-1 px-3 flex items-center gap-2"
-                    style={{
-                      backgroundColor: `hsl(${(index * 360) / selectedDistricts.length}, 70%, 50%, 0.1)`,
-                      color: `hsl(${(index * 360) / selectedDistricts.length}, 70%, 50%)`
-                    }}
-                  >
-                    {district}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (selectedDistricts.length > 1) { // 確保至少保留一個行政區
-                          setSelectedDistricts(selectedDistricts.filter(d => d !== district));
-                        }
-                      }}
-                      className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
-                      disabled={selectedDistricts.length <= 1}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 已選擇的社區標籤 */}
-          {selectedCommunities.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-              {selectedCommunities.map((community, index) => (
-                <div key={community} className="flex items-center gap-1">
-                  <Badge
-                    variant="secondary"
-                    className="text-sm py-1 px-3 flex items-center gap-2"
-                    style={{
-                      backgroundColor: `hsl(${(index * 360) / selectedCommunities.length}, 70%, 50%, 0.1)`,
-                      color: `hsl(${(index * 360) / selectedCommunities.length}, 70%, 50%)`
-                    }}
-                  >
-                    {community}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setSelectedCommunities(selectedCommunities.filter(c => c !== community));
-                      }}
-                      className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </Card>
 
