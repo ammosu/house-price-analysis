@@ -157,6 +157,8 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [availableCommunities, setAvailableCommunities] = useState<string[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
+  const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
   const [trendLines, setTrendLines] = useState<{ [key: string]: { slope: number; intercept: number; r2: number } }>({});
 
   // 計算基本統計資料
@@ -182,6 +184,11 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     }
 
     let filteredData = [...data];
+    
+    // 行政區過濾
+    if (selectedDistricts.length > 0) {
+      filteredData = filteredData.filter(d => selectedDistricts.includes(d.行政區));
+    }
     
     // 時間區間過濾
     if (startDate || endDate) {
@@ -258,22 +265,37 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     processData();
   }, [data, periodType, startDate, endDate, topN, selectedCommunities]);
 
-  // 當 topN 改變時更新可用社區列表
+  // 初始化行政區列表
   useEffect(() => {
     if (!data || data.length === 0) return;
     
-    const basicStats = calculateBasicStats(data);
+    // 獲取所有不重複的行政區
+    const districts = Array.from(new Set(data.map(d => d.行政區))).sort();
+    setAvailableDistricts(districts);
+    
+    // 預設選擇所有行政區
+    if (selectedDistricts.length === 0) {
+      setSelectedDistricts(districts);
+    }
+  }, [data]);
+
+  // 當行政區變化時更新社區列表
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+    
+    // 根據選擇的行政區過濾資料
+    const filteredData = selectedDistricts.length > 0
+      ? data.filter(d => selectedDistricts.includes(d.行政區))
+      : data;
+    
+    // 重新計算各社區的統計資料並排序
+    const basicStats = calculateBasicStats(filteredData);
     const newAvailable = basicStats.slice(0, topN).map(s => s.name);
     setAvailableCommunities(newAvailable);
     
-    // 如果沒有選擇的社區，則選擇所有可用社區
-    if (selectedCommunities.length === 0) {
-      setSelectedCommunities(newAvailable);
-    } else {
-      // 保留仍在可用列表中的已選社區
-      setSelectedCommunities(prev => prev.filter(c => newAvailable.includes(c)));
-    }
-  }, [data, topN]);
+    // 當行政區變化時，直接選擇所有新的TOP-K社區
+    setSelectedCommunities(newAvailable);
+  }, [data, selectedDistricts, topN]);
 
   return (
     <div className="space-y-6">
@@ -298,6 +320,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
                 setSelectedCommunities([]);
                 setPeriodType('month');
                 setTopN(5);
+                setSelectedDistricts(availableDistricts); // 重置為全選
               }}
               className="transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
@@ -348,34 +371,60 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
                 </SelectContent>
               </Select>
             </div>
+{/* 行政區選擇 */}
+<div className="col-span-2 space-y-2">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+    選擇行政區
+  </label>
+  <div className="flex flex-wrap gap-2 p-4 border rounded-lg bg-white dark:bg-gray-800">
+    {availableDistricts.map((district, index) => (
+      <Badge
+        key={district}
+        variant={selectedDistricts.includes(district) ? "default" : "outline"}
+        className={cn(
+          "cursor-pointer transition-all hover:opacity-80",
+          selectedDistricts.length === 1 && selectedDistricts.includes(district) && "cursor-not-allowed opacity-50"
+        )}
+        onClick={() => {
+          if (selectedDistricts.includes(district)) {
+            if (selectedDistricts.length > 1) { // 確保至少保留一個行政區
+              setSelectedDistricts(selectedDistricts.filter(d => d !== district));
+            }
+          } else {
+            setSelectedDistricts([...selectedDistricts, district]);
+          }
+        }}
+      >
+        {district}
+      </Badge>
+    ))}
+  </div>
+</div>
 
-            {/* 社區選擇 */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                選擇要分析的社區
-              </label>
-              <Select
-                value="placeholder"
-                onValueChange={(value) => {
-                  if (!selectedCommunities.includes(value)) {
-                    setSelectedCommunities([...selectedCommunities, value]);
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="選擇社區" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableCommunities
-                    .filter(name => !selectedCommunities.includes(name))
-                    .map(name => (
-                      <SelectItem key={name} value={name}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
+{/* 社區選擇 */}
+<div className="col-span-2 space-y-2">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+    選擇要分析的社區
+  </label>
+  <div className="flex flex-wrap gap-2 p-4 border rounded-lg bg-white dark:bg-gray-800">
+    {availableCommunities.map((community, index) => (
+      <Badge
+        key={community}
+        variant={selectedCommunities.includes(community) ? "default" : "outline"}
+        className="cursor-pointer transition-all hover:opacity-80"
+        onClick={() => {
+          if (selectedCommunities.includes(community)) {
+            setSelectedCommunities(selectedCommunities.filter(c => c !== community));
+          } else {
+            setSelectedCommunities([...selectedCommunities, community]);
+          }
+        }}
+      >
+        {community}
+      </Badge>
+    ))}
+  </div>
+</div>
 
             {/* 起始日期選擇 */}
             <div className="space-y-2">
@@ -440,6 +489,51 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
               </Popover>
             </div>
           </div>
+
+          {/* 已選擇的行政區標籤 */}
+          {selectedDistricts.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+              {selectedDistricts.map((district, index) => (
+                <div key={district} className="flex items-center gap-1">
+                  <Badge
+                    variant="secondary"
+                    className="text-sm py-1 px-3 flex items-center gap-2"
+                    style={{
+                      backgroundColor: `hsl(${(index * 360) / selectedDistricts.length}, 70%, 50%, 0.1)`,
+                      color: `hsl(${(index * 360) / selectedDistricts.length}, 70%, 50%)`
+                    }}
+                  >
+                    {district}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (selectedDistricts.length > 1) { // 確保至少保留一個行政區
+                          setSelectedDistricts(selectedDistricts.filter(d => d !== district));
+                        }
+                      }}
+                      className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
+                      disabled={selectedDistricts.length <= 1}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* 已選擇的社區標籤 */}
           {selectedCommunities.length > 0 && (
