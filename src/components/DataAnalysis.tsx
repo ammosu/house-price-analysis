@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, BarChart3, LineChart as LineChartIcon, Table as TableIcon } from "lucide-react";
+import { CalendarIcon, BarChart3, LineChart as LineChartIcon, Table as TableIcon, MapIcon } from "lucide-react";
+import CommunityMap from './PriceMap';
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import {
@@ -160,6 +161,13 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
   const [trendLines, setTrendLines] = useState<{ [key: string]: { slope: number; intercept: number; r2: number } }>({});
+  const [communityLocations, setCommunityLocations] = useState<Array<{
+    name: string;
+    lat: number;
+    lng: number;
+    count: number;
+    avgPrice: number;
+  }>>([]);
 
   // 計算基本統計資料
   const calculateBasicStats = (filteredData: HousePriceData[]) => {
@@ -209,6 +217,19 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
 
     // 計算基本統計資料
     const basicStats = calculateBasicStats(filteredData);
+
+    // 處理地理位置數據
+    const locations = _.chain(filteredData)
+      .groupBy('社區名稱')
+      .map((group, name) => ({
+        name,
+        lat: _.meanBy(group, '緯度'),
+        lng: _.meanBy(group, '經度'),
+        count: group.length,
+        avgPrice: _.meanBy(group, '交易價格')
+      }))
+      .value();
+    setCommunityLocations(locations);
 
     // 處理時間序列數據
     const history = processHistoryData(filteredData, selectedCommunities, periodType);
@@ -503,7 +524,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
 
       {/* 分析內容標籤頁 */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto">
           <TabsTrigger value="trend" className="space-x-2">
             <LineChartIcon className="h-4 w-4" />
             <span>價格趨勢</span>
@@ -515,6 +536,10 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
           <TabsTrigger value="stats" className="space-x-2">
             <TableIcon className="h-4 w-4" />
             <span>統計資料</span>
+          </TabsTrigger>
+          <TabsTrigger value="map" className="space-x-2">
+            <MapIcon className="h-4 w-4" />
+            <span>地圖檢視</span>
           </TabsTrigger>
         </TabsList>
 
@@ -715,6 +740,20 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="map" className="space-y-6">
+          <Card className="bg-white dark:bg-gray-800 shadow-lg">
+            <div className="p-6">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                社區地理分布
+              </h3>
+              <CommunityMap
+                locations={communityLocations}
+                selectedCommunities={selectedCommunities}
+              />
             </div>
           </Card>
         </TabsContent>
