@@ -116,7 +116,8 @@ const calculateTrendLine = (
 const processHistoryData = (
   rawData: HousePriceData[],
   communities: string[],
-  periodType: 'month' | 'quarter'
+  periodType: 'month' | 'quarter',
+  aggregationType: 'mean' | 'median'
 ): PriceHistory[] => {
   // 先轉換日期格式
   const processedData = rawData.map(d => ({
@@ -136,7 +137,11 @@ const processHistoryData = (
       communities.forEach(community => {
         const communityData = group.filter(d => d.社區名稱 === community);
         if (communityData.length > 0) {
-          periodData[community] = _.meanBy(communityData, '價格');
+          periodData[community] = aggregationType === 'mean'
+            ? _.meanBy(communityData, '價格')
+            : communityData.length % 2 === 0
+              ? _.orderBy(communityData, ['價格'], ['asc'])[Math.floor(communityData.length / 2)].價格
+              : _.orderBy(communityData, ['價格'], ['asc'])[Math.floor(communityData.length / 2)].價格;
         }
       });
       
@@ -151,6 +156,7 @@ const processHistoryData = (
 export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [activeTab, setActiveTab] = useState('trend');
   const [periodType, setPeriodType] = useState<'month' | 'quarter'>('month');
+  const [aggregationType, setAggregationType] = useState<'mean' | 'median'>('mean');
   const [topN, setTopN] = useState(5);
   const [communityStats, setCommunityStats] = useState<CommunityStats[]>([]);
   const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
@@ -232,7 +238,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     setCommunityLocations(locations);
 
     // 處理時間序列數據
-    const history = processHistoryData(filteredData, selectedCommunities, periodType);
+    const history = processHistoryData(filteredData, selectedCommunities, periodType, aggregationType);
     setPriceHistory(history);
 
     // 計算每個社區的趨勢線
@@ -284,7 +290,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
 
   useEffect(() => {
     processData();
-  }, [data, periodType, startDate, endDate, topN, selectedCommunities]);
+  }, [data, periodType, startDate, endDate, topN, selectedCommunities, aggregationType]);
 
   // 初始化行政區列表
   useEffect(() => {
@@ -340,6 +346,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
                 setEndDate('');
                 setSelectedCommunities([]);
                 setPeriodType('month');
+                setAggregationType('mean');
                 setTopN(5);
                 setSelectedDistricts(availableDistricts); // 重置為全選
               }}
@@ -355,18 +362,34 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 分析週期
               </label>
-              <Select
-                value={periodType}
-                onValueChange={(value) => setPeriodType(value as 'month' | 'quarter')}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="選擇分析週期" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="month">月度分析</SelectItem>
-                  <SelectItem value="quarter">季度分析</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Select
+                  value={periodType}
+                  onValueChange={(value) => setPeriodType(value as 'month' | 'quarter')}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="選擇分析週期" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="month">月度分析</SelectItem>
+                    <SelectItem value="quarter">季度分析</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Select
+                  value={aggregationType}
+                  onValueChange={(value) => setAggregationType(value as 'mean' | 'median')}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="選擇計算方式" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mean">平均值</SelectItem>
+                    <SelectItem value="median">中位數</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* 顯示社區數量選擇 */}

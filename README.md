@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 房價分析系統
 
-## Getting Started
+這是一個以 Next.js 開發的房價分析系統，提供房價資料視覺化與分析功能。
 
-First, run the development server:
+## 功能特色
 
+- 📊 資料分析：支援房價趨勢分析與統計
+- 🗺️ 地圖視覺化：整合 Leaflet 地圖呈現房價分布
+- 📈 互動式圖表：運用 Recharts 和 Tremor 提供豐富的資料視覺化
+- 📁 檔案上傳：支援 CSV 格式的房價資料上傳與解析
+- 💻 響應式設計：支援各種裝置尺寸的介面
+
+## 技術架構
+
+- **前端框架**：Next.js 15
+- **程式語言**：TypeScript
+- **使用者介面框架**：
+  - Tailwind CSS
+  - Radix UI
+  - Tremor
+- **地圖**：Leaflet / React-Leaflet
+- **圖表**：Recharts
+- **資料處理**：Papa Parse
+- **容器化**：Docker
+
+## 開始使用
+
+### 本機開發
+
+1. 安裝套件：
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. 啟動開發伺服器：
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. 開啟瀏覽器前往 [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Docker 部署
 
-## Learn More
+1. 建立 Docker 映像檔：
+```bash
+docker-compose build
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. 啟動容器：
+```bash
+docker-compose up -d
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. 前往 [http://localhost:3000](http://localhost:3000)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 系統需求
 
-## Deploy on Vercel
+- Node.js 18.0 以上版本
+- npm 9.0 以上版本
+- Docker（若需容器化部署）
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 開發指令
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` - 啟動開發伺服器
+- `npm run build` - 建立正式版本
+- `npm run start` - 啟動正式伺服器
+- `npm run lint` - 執行程式碼檢查
+
+## 授權條款
+
+本專案採用 MIT 授權條款。詳情請參閱 [LICENSE](LICENSE) 檔案。
