@@ -478,67 +478,112 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   </div>
 </div>
 
-            {/* 起始日期選擇 */}
+            {/* 起始年月選擇 */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                起始日期
+                起始年月
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(new Date(startDate), 'yyyy年MM月') : '選擇起始日期'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate ? new Date(startDate) : undefined}
-                    onSelect={(date) => date && setStartDate(format(date, 'yyyy-MM'))}
-                    initialFocus
-                    locale={zhTW}
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="grid grid-cols-2 gap-2">
+                <Select
+                  value={startDate ? startDate.split('-')[0] : ''}
+                  onValueChange={(year) => {
+                    const month = startDate ? startDate.split('-')[1] : '01';
+                    setStartDate(`${year}-${month}`);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇年份" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                      <SelectItem key={year} value={String(year)}>
+                        {year}年
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={startDate ? startDate.split('-')[1] : ''}
+                  onValueChange={(month) => {
+                    const year = startDate ? startDate.split('-')[0] : new Date().getFullYear().toString();
+                    setStartDate(`${year}-${month}`);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇月份" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map((month) => (
+                      <SelectItem key={month} value={month}>
+                        {parseInt(month)}月
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* 結束日期選擇 */}
+            {/* 結束年月選擇 */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                結束日期
+                結束年月
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(new Date(endDate), 'yyyy年MM月') : '選擇結束日期'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="single"
-                    selected={endDate ? new Date(endDate) : undefined}
-                    onSelect={(date) => date && setEndDate(format(date, 'yyyy-MM'))}
-                    initialFocus
-                    locale={zhTW}
-                    disabled={(date) =>
-                      startDate ? date < new Date(startDate) : false
+              <div className="grid grid-cols-2 gap-2">
+                <Select
+                  value={endDate ? endDate.split('-')[0] : ''}
+                  onValueChange={(year) => {
+                    const month = endDate ? endDate.split('-')[1] : '12';
+                    const newEndDate = `${year}-${month}`;
+                    if (!startDate || newEndDate >= startDate) {
+                      setEndDate(newEndDate);
                     }
-                  />
-                </PopoverContent>
-              </Popover>
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇年份" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                      <SelectItem
+                        key={year}
+                        value={String(year)}
+                        disabled={startDate ? year < parseInt(startDate.split('-')[0]) : false}
+                      >
+                        {year}年
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={endDate ? endDate.split('-')[1] : ''}
+                  onValueChange={(month) => {
+                    const year = endDate ? endDate.split('-')[0] : new Date().getFullYear().toString();
+                    const newEndDate = `${year}-${month}`;
+                    if (!startDate || newEndDate >= startDate) {
+                      setEndDate(newEndDate);
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇月份" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map((month) => (
+                      <SelectItem
+                        key={month}
+                        value={month}
+                        disabled={Boolean(
+                          startDate &&
+                          endDate?.split('-')[0] === startDate.split('-')[0] &&
+                          parseInt(month) < parseInt(startDate.split('-')[1])
+                        )}
+                      >
+                        {parseInt(month)}月
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
