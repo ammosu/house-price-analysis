@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, LineChart as LineChartIcon, Table as TableIcon, MapIcon } from "lucide-react";
 import _ from 'lodash';
+import { cn } from '@/lib/utils';
 import { DataAnalysisProps, CommunityStats, PriceHistory, TrendLines, CommunityLocation } from './types';
 import { AnalysisSettings } from './AnalysisSettings';
 import { PriceTrendChart } from './PriceTrendChart';
@@ -19,6 +20,7 @@ import {
 
 export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [activeTab, setActiveTab] = useState('trend');
+  const [isLoading, setIsLoading] = useState(false);
   const [periodType, setPeriodType] = useState<'month' | 'quarter'>('month');
   const [aggregationType, setAggregationType] = useState<'mean' | 'median'>('mean');
   const [topN, setTopN] = useState(5);
@@ -34,8 +36,11 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [communityLocations, setCommunityLocations] = useState<CommunityLocation[]>([]);
 
   const processData = () => {
+    setIsLoading(true);
+    
     if (!data || data.length === 0) {
       console.log('No data available');
+      setIsLoading(false);
       return;
     }
 
@@ -127,6 +132,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
 
     setTrendLines(trends);
     setCommunityStats(stats);
+    setIsLoading(false);
   };
 
   // 當資料變化時更新行政區列表
@@ -204,49 +210,105 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto">
-          <TabsTrigger value="trend" className="space-x-2">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto bg-gray-100 dark:bg-gray-800 p-1 rounded-lg gap-1">
+          <TabsTrigger
+            value="trend"
+            className={cn(
+              "space-x-2 transition-all duration-200",
+              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
+              "data-[state=active]:shadow-sm",
+              "rounded-md px-4 py-2"
+            )}
+          >
             <LineChartIcon className="h-4 w-4" />
             <span>價格趨勢</span>
           </TabsTrigger>
-          <TabsTrigger value="trendline" className="space-x-2">
+          <TabsTrigger
+            value="trendline"
+            className={cn(
+              "space-x-2 transition-all duration-200",
+              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
+              "data-[state=active]:shadow-sm",
+              "rounded-md px-4 py-2"
+            )}
+          >
             <BarChart3 className="h-4 w-4" />
             <span>趨勢線</span>
           </TabsTrigger>
-          <TabsTrigger value="stats" className="space-x-2">
+          <TabsTrigger
+            value="stats"
+            className={cn(
+              "space-x-2 transition-all duration-200",
+              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
+              "data-[state=active]:shadow-sm",
+              "rounded-md px-4 py-2"
+            )}
+          >
             <TableIcon className="h-4 w-4" />
             <span>統計資料</span>
           </TabsTrigger>
-          <TabsTrigger value="map" className="space-x-2">
+          <TabsTrigger
+            value="map"
+            className={cn(
+              "space-x-2 transition-all duration-200",
+              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
+              "data-[state=active]:shadow-sm",
+              "rounded-md px-4 py-2"
+            )}
+          >
             <MapIcon className="h-4 w-4" />
             <span>地圖檢視</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="trend">
-          <PriceTrendChart
-            priceHistory={priceHistory}
-            selectedCommunities={selectedCommunities}
-          />
+        <TabsContent value="trend" className="relative min-h-[400px]">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <PriceTrendChart
+              priceHistory={priceHistory}
+              selectedCommunities={selectedCommunities}
+            />
+          )}
         </TabsContent>
 
-        <TabsContent value="trendline">
-          <TrendLineChart
-            priceHistory={priceHistory}
-            selectedCommunities={selectedCommunities}
-            trendLines={trendLines}
-          />
+        <TabsContent value="trendline" className="relative min-h-[400px]">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <TrendLineChart
+              priceHistory={priceHistory}
+              selectedCommunities={selectedCommunities}
+              trendLines={trendLines}
+            />
+          )}
         </TabsContent>
 
-        <TabsContent value="stats">
-          <CommunityStatsTable communityStats={communityStats} />
+        <TabsContent value="stats" className="relative min-h-[400px]">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <CommunityStatsTable communityStats={communityStats} />
+          )}
         </TabsContent>
 
-        <TabsContent value="map">
-          <CommunityMapView
-            locations={communityLocations}
-            selectedCommunities={selectedCommunities}
-          />
+        <TabsContent value="map" className="relative min-h-[400px]">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <CommunityMapView
+              locations={communityLocations}
+              selectedCommunities={selectedCommunities}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>
