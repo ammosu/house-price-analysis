@@ -1,13 +1,16 @@
 import { Card } from '@tremor/react';
 import { cn } from '@/lib/utils';
 import { CommunityStats } from './types';
+import { getCommunityColor } from './utils';
 
 interface CommunityStatsTableProps {
   communityStats: CommunityStats[];
+  availableCommunities: string[];
 }
 
 export const CommunityStatsTable: React.FC<CommunityStatsTableProps> = ({
   communityStats,
+  availableCommunities,
 }) => {
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
@@ -53,7 +56,7 @@ export const CommunityStatsTable: React.FC<CommunityStatsTableProps> = ({
                       <div
                         className="w-2 h-2 rounded-full"
                         style={{
-                          backgroundColor: `hsl(${(index * 360) / communityStats.length}, 70%, 50%)`
+                          backgroundColor: getCommunityColor(stat.name, availableCommunities)
                         }}
                       />
                       <span>{stat.name}</span>
