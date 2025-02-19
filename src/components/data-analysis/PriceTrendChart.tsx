@@ -10,15 +10,18 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { PriceHistory } from './types';
+import { getCommunityColor } from './utils';
 
 interface PriceTrendChartProps {
   priceHistory: PriceHistory[];
   selectedCommunities: string[];
+  availableCommunities: string[];
 }
 
 export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
   priceHistory,
   selectedCommunities,
+  availableCommunities,
 }) => {
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-lg">
@@ -61,7 +64,7 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
                   type="monotone"
                   dataKey={community}
                   name={`${community} 實際價格`}
-                  stroke={`hsl(${(index * 360) / selectedCommunities.length}, 70%, 50%)`}
+                  stroke={getCommunityColor(community, availableCommunities)}
                   strokeWidth={2}
                   dot={{ r: 4, strokeWidth: 2 }}
                   activeDot={{ r: 6, strokeWidth: 2 }}

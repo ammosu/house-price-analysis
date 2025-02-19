@@ -270,6 +270,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
             <PriceTrendChart
               priceHistory={priceHistory}
               selectedCommunities={selectedCommunities}
+              availableCommunities={availableCommunities}
             />
           )}
         </TabsContent>
@@ -283,6 +284,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
             <TrendLineChart
               priceHistory={priceHistory}
               selectedCommunities={selectedCommunities}
+              availableCommunities={availableCommunities}
               trendLines={trendLines}
             />
           )}

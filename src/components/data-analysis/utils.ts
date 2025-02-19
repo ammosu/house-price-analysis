@@ -2,6 +2,12 @@ import _ from 'lodash';
 import { HousePriceData } from '@/types/house';
 import { CommunityStats, PriceHistory } from './types';
 
+export const getCommunityColor = (community: string, availableCommunities: string[]) => {
+  const index = availableCommunities.indexOf(community);
+  if (index === -1) return 'hsl(0, 0%, 50%)'; // 預設顏色
+  return `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`;
+};
+
 export const formatDate = (dateStr: string, periodType: 'month' | 'quarter'): string => {
   const year = dateStr.slice(0, 4);
   const month = parseInt(dateStr.slice(4, 6));

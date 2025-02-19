@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getCommunityColor } from "./utils";
 
 interface CommunitySelectorProps {
   availableCommunities: string[];
@@ -24,12 +25,12 @@ export const CommunitySelector: React.FC<CommunitySelectorProps> = ({
             variant={selectedCommunities.includes(community) ? "default" : "outline"}
             className="cursor-pointer transition-all hover:opacity-80"
             style={selectedCommunities.includes(community) ? {
-              backgroundColor: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%, 0.1)`,
-              color: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`,
-              borderColor: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`
+              backgroundColor: `${getCommunityColor(community, availableCommunities)}1A`, // 1A = 10% opacity
+              color: getCommunityColor(community, availableCommunities),
+              borderColor: getCommunityColor(community, availableCommunities)
             } : {
-              borderColor: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`,
-              color: `hsl(${(index * 360) / availableCommunities.length}, 70%, 50%)`
+              borderColor: getCommunityColor(community, availableCommunities),
+              color: getCommunityColor(community, availableCommunities)
             }}
             onClick={() => {
               if (selectedCommunities.includes(community)) {

@@ -10,16 +10,19 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { PriceHistory, TrendLines } from './types';
+import { getCommunityColor } from './utils';
 
 interface TrendLineChartProps {
   priceHistory: PriceHistory[];
   selectedCommunities: string[];
+  availableCommunities: string[];
   trendLines: TrendLines;
 }
 
 export const TrendLineChart: React.FC<TrendLineChartProps> = ({
   priceHistory,
   selectedCommunities,
+  availableCommunities,
   trendLines,
 }) => {
   return (
@@ -61,7 +64,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
                 const trend = trendLines[community];
                 if (!trend) return null;
 
-                const color = `hsl(${(index * 360) / selectedCommunities.length}, 70%, 50%)`;
+                const color = getCommunityColor(community, availableCommunities);
                 return (
                   <Line
                     key={community}
