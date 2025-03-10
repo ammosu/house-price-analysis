@@ -38,6 +38,12 @@ export const CommunityStatsTable: React.FC<CommunityStatsTableProps> = ({
                   最高價格
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  MAPE
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  MPE
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   趨勢斜率
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -73,6 +79,12 @@ export const CommunityStatsTable: React.FC<CommunityStatsTableProps> = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {stat.maxPrice.toLocaleString('zh-TW')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {(stat.mape * 100).toFixed(2)}%
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {(stat.mpe * 100).toFixed(2)}%
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span

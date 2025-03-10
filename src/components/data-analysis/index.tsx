@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, LineChart as LineChartIcon, Table as TableIcon, MapIcon } from "lucide-react";
 import _ from 'lodash';
 import { cn } from '@/lib/utils';
-import { DataAnalysisProps, CommunityStats, PriceHistory, TrendLines, CommunityLocation } from './types';
+import { DataAnalysisProps, CommunityStats, PriceHistory, TrendLines, CommunityLocation, SortCriteria } from './types';
 import { AnalysisSettings } from './AnalysisSettings';
 import { PriceTrendChart } from './PriceTrendChart';
 import { TrendLineChart } from './TrendLineChart';
@@ -24,6 +24,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [periodType, setPeriodType] = useState<'month' | 'quarter'>('month');
   const [aggregationType, setAggregationType] = useState<'mean' | 'median'>('mean');
   const [topN, setTopN] = useState(5);
+  const [sortCriteria, setSortCriteria] = useState<SortCriteria>('count');
   const [communityStats, setCommunityStats] = useState<CommunityStats[]>([]);
   const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>([]);
@@ -92,6 +93,12 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     const stats: CommunityStats[] = [];
 
     selectedCommunities.forEach(community => {
+      // 先從basicStats中找出該社區的基本統計資料
+      const basicStat = basicStats.find(s => s.name === community);
+      
+      // 如果找不到該社區的資料，跳過
+      if (!basicStat) return;
+      
       const communityData = history
         .map(h => ({
           price: h[community] as number,
@@ -99,6 +106,11 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
         }))
         .filter(d => d.price !== undefined);
 
+      // 預設趨勢線相關值
+      let trendSlope = 0;
+      let r2Score = 0;
+
+      // 只有當有足夠的資料點時才計算趨勢線
       if (communityData.length >= 2) {
         const prices = communityData.map(d => d.price);
         const periods = communityData.map(d => d.period);
@@ -120,14 +132,17 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
           history[i][`${community}_trend`] = trendAnalysis.intercept + trendAnalysis.slope * monthsSinceStart;
         }
 
-        // 更新社區統計資料
-        const basicStat = basicStats.find(s => s.name === community)!;
-        stats.push({
-          ...basicStat,
-          trendSlope: trendAnalysis.slope,
-          r2Score: trendAnalysis.r2
-        });
+        // 更新趨勢線相關值
+        trendSlope = trendAnalysis.slope;
+        r2Score = trendAnalysis.r2;
       }
+
+      // 無論是否有足夠的資料點計算趨勢線，都添加到統計資料中
+      stats.push({
+        ...basicStat,
+        trendSlope,
+        r2Score
+      });
     });
 
     setTrendLines(trends);
@@ -156,22 +171,39 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       : data;
     
     const basicStats = calculateBasicStats(filteredData);
-    const newAvailable = basicStats.slice(0, topN).map(s => s.name);
+    
+    // 根據選擇的排序條件進行排序
+    let sortedStats;
+    switch (sortCriteria) {
+      case 'mape':
+        sortedStats = _.orderBy(basicStats, ['mape'], ['desc']); // 降序排列，誤差大的在前
+        break;
+      case 'mpe':
+        sortedStats = _.orderBy(basicStats, ['mpe'], ['desc']); // 降序排列，誤差大的在前
+        break;
+      case 'count':
+      default:
+        sortedStats = _.orderBy(basicStats, ['count'], ['desc']); // 降序排列，交易次數多的在前
+        break;
+    }
+    
+    const newAvailable = sortedStats.slice(0, topN).map(s => s.name);
     setAvailableCommunities(newAvailable);
     
     setSelectedCommunities(newAvailable);
-  }, [data, selectedDistricts, topN]);
+  }, [data, selectedDistricts, topN, sortCriteria]);
 
   // 當相關設定變化時重新處理資料
   useEffect(() => {
     processData();
-  }, [data, periodType, startDate, endDate, topN, selectedCommunities, aggregationType]);
+  }, [data, periodType, startDate, endDate, topN, selectedCommunities, aggregationType, sortCriteria]);
 
   const handleSettingsChange = (key: string, value: any) => {
     const settingsMap: { [key: string]: (value: any) => void } = {
       periodType: setPeriodType,
       aggregationType: setAggregationType,
       topN: setTopN,
+      sortCriteria: setSortCriteria,
       selectedDistricts: setSelectedDistricts,
       selectedCommunities: setSelectedCommunities,
       startDate: setStartDate,
@@ -190,6 +222,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     setPeriodType('month');
     setAggregationType('mean');
     setTopN(5);
+    setSortCriteria('count');
     setSelectedDistricts(availableDistricts);
   };
 
@@ -199,6 +232,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
         periodType={periodType}
         aggregationType={aggregationType}
         topN={topN}
+        sortCriteria={sortCriteria}
         selectedDistricts={selectedDistricts}
         selectedCommunities={selectedCommunities}
         startDate={startDate}

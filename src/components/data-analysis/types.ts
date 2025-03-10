@@ -1,5 +1,8 @@
 import { HousePriceData } from '@/types/house';
 
+// 添加排序條件類型
+export type SortCriteria = 'count' | 'mape' | 'mpe';
+
 export interface CommunityStats {
   name: string;
   count: number;
@@ -8,6 +11,8 @@ export interface CommunityStats {
   maxPrice: number;
   trendSlope: number;
   r2Score: number;
+  mape: number; // 添加MAPE字段
+  mpe: number;  // 添加MPE字段
 }
 
 export interface PriceHistory {
@@ -31,6 +36,7 @@ export interface AnalysisSettings {
   periodType: 'month' | 'quarter';
   aggregationType: 'mean' | 'median';
   topN: number;
+  sortCriteria: SortCriteria; // 新增排序條件
   selectedDistricts: string[];
   selectedCommunities: string[];
   startDate: string;

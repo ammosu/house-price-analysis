@@ -105,13 +105,33 @@ export const processHistoryData = (
 export const calculateBasicStats = (filteredData: HousePriceData[]) => {
   return _.chain(filteredData)
     .groupBy('社區名稱')
-    .map((group, name) => ({
-      name,
-      count: group.length,
-      avgPrice: _.meanBy(group, '交易價格'),
-      minPrice: _.minBy(group, '交易價格')?.交易價格 || 0,
-      maxPrice: _.maxBy(group, '交易價格')?.交易價格 || 0
-    }))
-    .orderBy(['count'], ['desc'])
+    .map((group, name) => {
+      // 計算每個項目的誤差百分比
+      const errorPercentages = group.map(item => {
+        const actualValue = item.交易價格;
+        const estimatedValue = item.估值;
+        // 避免除以零的情況
+        if (estimatedValue === 0) return { ape: 0, pe: 0 };
+        
+        // 計算絕對百分比誤差和百分比誤差
+        const ape = Math.abs(actualValue - estimatedValue) / estimatedValue;
+        const pe = (actualValue - estimatedValue) / estimatedValue;
+        return { ape, pe };
+      });
+      
+      // 計算MAPE和MPE
+      const mape = _.meanBy(errorPercentages, 'ape');
+      const mpe = _.meanBy(errorPercentages, 'pe');
+      
+      return {
+        name,
+        count: group.length,
+        avgPrice: _.meanBy(group, '交易價格'),
+        minPrice: _.minBy(group, '交易價格')?.交易價格 || 0,
+        maxPrice: _.maxBy(group, '交易價格')?.交易價格 || 0,
+        mape: mape || 0,
+        mpe: mpe || 0
+      };
+    })
     .value();
 };

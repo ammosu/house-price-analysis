@@ -5,6 +5,7 @@ import { CommunityCountSelector } from './CommunityCountSelector';
 import { DistrictSelector } from './DistrictSelector';
 import { CommunitySelector } from './CommunitySelector';
 import { DateRangeSelector } from './DateRangeSelector';
+import { SortCriteriaSelector } from './SortCriteriaSelector';
 import { AnalysisSettings as AnalysisSettingsType } from './types';
 
 interface AnalysisSettingsProps extends AnalysisSettingsType {
@@ -18,6 +19,7 @@ export const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
   periodType,
   aggregationType,
   topN,
+  sortCriteria,
   selectedDistricts,
   selectedCommunities,
   startDate,
@@ -60,6 +62,11 @@ export const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
           <CommunityCountSelector
             topN={topN}
             onTopNChange={(value) => onSettingsChange('topN', value)}
+          />
+
+          <SortCriteriaSelector
+            sortCriteria={sortCriteria}
+            onSortCriteriaChange={(value) => onSettingsChange('sortCriteria', value)}
           />
 
           <DistrictSelector
