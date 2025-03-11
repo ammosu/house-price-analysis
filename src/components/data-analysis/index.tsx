@@ -182,6 +182,28 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       ? data.filter(d => selectedDistricts.includes(d.行政區))
       : data;
     
+    // 篩選出最近兩年內有至少5筆交易的社區
+    const now = new Date();
+    const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate());
+    
+    // 將兩年前的日期轉換為與交易年月日相同的格式 (YYYYMMDD)
+    const twoYearsAgoFormatted = parseInt(
+      `${twoYearsAgo.getFullYear()}${String(twoYearsAgo.getMonth() + 1).padStart(2, '0')}${String(twoYearsAgo.getDate()).padStart(2, '0')}`
+    );
+    
+    // 篩選最近兩年的交易
+    const recentTransactions = filteredData.filter(d => d.交易年月日 >= twoYearsAgoFormatted);
+    
+    // 計算每個社區在最近兩年內的交易次數
+    const communityTransactionCounts = _.chain(recentTransactions)
+      .groupBy('社區名稱')
+      .mapValues(group => group.length)
+      .value();
+    
+    // 篩選出交易次數>=5的社區
+    const communitiesWithEnoughTransactions = Object.keys(communityTransactionCounts)
+      .filter(community => communityTransactionCounts[community] >= 5);
+    
     const basicStats = calculateBasicStats(filteredData);
     
     // 根據選擇的排序條件進行排序
@@ -202,9 +224,13 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
         break;
     }
     
-    const newAvailable = sortedStats.slice(0, topN).map(s => s.name);
-    setAvailableCommunities(newAvailable);
+    // 只選擇有足夠交易量的社區，然後再取前N個
+    const newAvailable = sortedStats
+      .filter(s => communitiesWithEnoughTransactions.includes(s.name))
+      .slice(0, topN)
+      .map(s => s.name);
     
+    setAvailableCommunities(newAvailable);
     setSelectedCommunities(newAvailable);
   }, [data, selectedDistricts, topN, sortCriteria]);
 
