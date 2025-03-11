@@ -27,9 +27,9 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col gap-4">
       {/* 起始年月選擇 */}
-      <div className="flex-1 space-y-2 min-w-[280px]">
+      <div className="flex-1 space-y-2">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
           起始年月
         </label>
@@ -92,7 +92,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
       </div>
 
       {/* 結束年月選擇 */}
-      <div className="flex-1 space-y-2 min-w-[280px]">
+      <div className="flex-1 space-y-2">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
           結束年月
         </label>
