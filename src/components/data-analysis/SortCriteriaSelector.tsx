@@ -57,9 +57,9 @@ export const SortCriteriaSelector: React.FC<SortCriteriaSelectorProps> = ({
               </TooltipProvider>
             </div>
           </SelectItem>
-          <SelectItem value="mpe">
+          <SelectItem value="mpe_asc">
             <div className="flex items-center">
-              <span>依MPE</span>
+              <span>依MPE (升序)</span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -67,7 +67,23 @@ export const SortCriteriaSelector: React.FC<SortCriteriaSelectorProps> = ({
                   </TooltipTrigger>
                   <TooltipContent side="right" className="max-w-xs">
                     <p>平均百分比誤差 (Mean Percentage Error)</p>
-                    <p className="text-xs text-gray-500 mt-1">衡量預測值與實際值之間的誤差百分比，可能為正或負</p>
+                    <p className="text-xs text-gray-500 mt-1">從低到高排序 (負值在前，正值在後)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </SelectItem>
+          <SelectItem value="mpe_desc">
+            <div className="flex items-center">
+              <span>依MPE (降序)</span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 ml-1.5 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-xs">
+                    <p>平均百分比誤差 (Mean Percentage Error)</p>
+                    <p className="text-xs text-gray-500 mt-1">從高到低排序 (正值在前，負值在後)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -89,10 +105,16 @@ export const SortCriteriaSelector: React.FC<SortCriteriaSelectorProps> = ({
             <span>依預測誤差絕對值大小排序</span>
           </div>
         )}
-        {sortCriteria === 'mpe' && (
+        {sortCriteria === 'mpe_asc' && (
           <div className="flex items-center">
             <span className="w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>
-            <span>依預測誤差正負值排序</span>
+            <span>依預測誤差從低到高排序 (負→正)</span>
+          </div>
+        )}
+        {sortCriteria === 'mpe_desc' && (
+          <div className="flex items-center">
+            <span className="w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>
+            <span>依預測誤差從高到低排序 (正→負)</span>
           </div>
         )}
       </div>

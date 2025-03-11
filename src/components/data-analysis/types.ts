@@ -1,7 +1,7 @@
 import { HousePriceData } from '@/types/house';
 
 // 添加排序條件類型
-export type SortCriteria = 'count' | 'mape' | 'mpe';
+export type SortCriteria = 'count' | 'mape' | 'mpe_asc' | 'mpe_desc';
 
 export interface CommunityStats {
   name: string;

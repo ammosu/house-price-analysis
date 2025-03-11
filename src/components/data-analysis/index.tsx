@@ -190,8 +190,11 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       case 'mape':
         sortedStats = _.orderBy(basicStats, ['mape'], ['desc']); // 降序排列，誤差大的在前
         break;
-      case 'mpe':
-        sortedStats = _.orderBy(basicStats, ['mpe'], ['desc']); // 降序排列，誤差大的在前
+      case 'mpe_asc':
+        sortedStats = _.orderBy(basicStats, ['mpe'], ['asc']); // 升序排列，負值在前
+        break;
+      case 'mpe_desc':
+        sortedStats = _.orderBy(basicStats, ['mpe'], ['desc']); // 降序排列，正值在前
         break;
       case 'count':
       default:
