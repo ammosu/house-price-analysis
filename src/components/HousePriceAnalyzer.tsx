@@ -68,7 +68,7 @@ const HousePriceAnalyzer: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  數據上傳
+                  資料上傳
                 </h2>
                 <p className="text-gray-500 dark:text-gray-400 mt-1">
                   請上傳房價交易CSV檔案以開始分析

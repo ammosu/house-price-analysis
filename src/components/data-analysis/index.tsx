@@ -74,7 +74,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     // 計算基本統計資料
     const basicStats = calculateBasicStats(filteredData);
 
-    // 處理地理位置數據
+    // 處理地理位置資料
     const locations = _.chain(filteredData)
       .groupBy('社區名稱')
       .map((group, name) => ({
@@ -87,7 +87,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       .value();
     setCommunityLocations(locations);
 
-    // 處理時間序列數據
+    // 處理時間序列資料
     const history = processHistoryData(filteredData, selectedCommunities, periodType, aggregationType);
     setPriceHistory(history);
 

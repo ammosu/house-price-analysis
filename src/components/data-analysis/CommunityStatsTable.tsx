@@ -226,7 +226,7 @@ export const CommunityStatsTable: React.FC<CommunityStatsTableProps> = ({
                           <Info className="w-3 h-3 text-gray-400" />
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-xs">
-                          <p>決定係數，衡量趨勢線與實際數據的擬合程度</p>
+                          <p>決定係數，衡量趨勢線與實際資料的擬合程度</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
