@@ -1,5 +1,5 @@
 export interface HousePriceData {
-    交易年月日: number;
+    交易年月日: string;
     社區名稱: string;
     交易價格: number;
     估值: number;

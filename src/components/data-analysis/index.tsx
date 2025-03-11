@@ -57,8 +57,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     // 時間區間過濾
     if (startDate || endDate) {
       filteredData = filteredData.filter(d => {
-        const dateStr = String(d.交易年月日);
-        const formattedDate = formatDate(dateStr, 'month');
+        const formattedDate = formatDate(d.交易年月日, 'month');
         const isAfterStart = !startDate || formattedDate >= startDate;
         const isBeforeEnd = !endDate || formattedDate <= endDate;
         return isAfterStart && isBeforeEnd;
@@ -186,10 +185,8 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     const now = new Date();
     const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate());
     
-    // 將兩年前的日期轉換為與交易年月日相同的格式 (YYYYMMDD)
-    const twoYearsAgoFormatted = parseInt(
-      `${twoYearsAgo.getFullYear()}${String(twoYearsAgo.getMonth() + 1).padStart(2, '0')}${String(twoYearsAgo.getDate()).padStart(2, '0')}`
-    );
+    // 將兩年前的日期轉換為與交易年月日相同的格式 (YYYY-MM-DD)
+    const twoYearsAgoFormatted = `${twoYearsAgo.getFullYear()}-${String(twoYearsAgo.getMonth() + 1).padStart(2, '0')}-${String(twoYearsAgo.getDate()).padStart(2, '0')}`;
     
     // 篩選最近兩年的交易
     const recentTransactions = filteredData.filter(d => d.交易年月日 >= twoYearsAgoFormatted);

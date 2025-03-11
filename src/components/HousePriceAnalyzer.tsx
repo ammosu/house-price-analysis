@@ -24,11 +24,18 @@ const HousePriceAnalyzer: React.FC = () => {
       if (event.target?.result) {
         parse<HousePriceData>(event.target.result as string, {
           header: true,
-          dynamicTyping: true,
+          dynamicTyping: {
+            // 除了交易年月日外，其他數字欄位仍然自動轉換
+            交易年月日: false,
+            交易價格: true,
+            估值: true,
+            緯度: true,
+            經度: true
+          },
           complete: (results: ParseResult<HousePriceData>) => {
             try {
               const cleanData = results.data.filter((row): row is HousePriceData =>
-                typeof row.交易年月日 === 'number' &&
+                typeof row.交易年月日 === 'string' &&
                 typeof row.社區名稱 === 'string' &&
                 typeof row.交易價格 === 'number'
               );

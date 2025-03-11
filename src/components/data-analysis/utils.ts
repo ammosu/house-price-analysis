@@ -9,8 +9,11 @@ export const getCommunityColor = (community: string, availableCommunities: strin
 };
 
 export const formatDate = (dateStr: string, periodType: 'month' | 'quarter'): string => {
-  const year = dateStr.slice(0, 4);
-  const month = parseInt(dateStr.slice(4, 6));
+  // 處理 YYYY-MM-DD 格式
+  const parts = dateStr.split('-');
+  const year = parts[0];
+  const month = parseInt(parts[1]);
+  
   return periodType === 'month'
     ? `${year}-${month.toString().padStart(2, '0')}`
     : `${year}-Q${Math.ceil(month / 3)}`;
@@ -91,7 +94,7 @@ export const processHistoryData = (
 ): PriceHistory[] => {
   const processedData = rawData.map(d => ({
     ...d,
-    periodValue: formatDate(String(d.交易年月日), periodType),
+    periodValue: formatDate(d.交易年月日, periodType),
     價格: d.交易價格
   }));
 
