@@ -298,7 +298,9 @@ export const CommunityStatsTable: React.FC<CommunityStatsTableProps> = ({
                           : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                       )}
                     >
-                      {stat.trendSlope.toFixed(2)}
+                      {stat.isLogTransformed 
+                        ? (stat.trendSlope * 100).toFixed(2) + '%' 
+                        : stat.trendSlope.toFixed(2)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">

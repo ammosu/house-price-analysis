@@ -13,6 +13,7 @@ export interface CommunityStats {
   r2Score: number;
   mape: number; // 添加MAPE字段
   mpe: number;  // 添加MPE字段
+  isLogTransformed?: boolean; // 添加是否使用對數轉換的標記
 }
 
 export interface PriceHistory {

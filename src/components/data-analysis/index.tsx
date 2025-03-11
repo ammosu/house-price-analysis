@@ -148,7 +148,8 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       stats.push({
         ...basicStat,
         trendSlope,
-        r2Score
+        r2Score,
+        isLogTransformed: useLogTransform
       });
     });
 
