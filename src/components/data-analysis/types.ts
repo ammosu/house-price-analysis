@@ -41,12 +41,14 @@ export interface AnalysisSettings {
   selectedCommunities: string[];
   startDate: string;
   endDate: string;
+  useLogTransform: boolean; // 新增：是否使用對數轉換
 }
 
 export interface TrendLineData {
   slope: number;
   intercept: number;
   r2: number;
+  isLogTransformed?: boolean;
 }
 
 export type TrendLines = {

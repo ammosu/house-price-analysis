@@ -19,9 +19,22 @@ export const formatDate = (dateStr: string, periodType: 'month' | 'quarter'): st
 export const calculateTrendLine = (
   prices: number[],
   timePoints: string[],
-  periodType: 'month' | 'quarter'
+  periodType: 'month' | 'quarter',
+  useLogTransform: boolean = false // 新增參數控制是否使用對數轉換
 ) => {
-  if (prices.length < 2) return { slope: 0, intercept: 0, r2: 0 };
+  if (prices.length < 2) return { slope: 0, intercept: 0, r2: 0, isLogTransformed: useLogTransform };
+
+  // 過濾掉零值或負值（對數轉換不能用於這些值）
+  const validIndices = prices.map((p, i) => useLogTransform && p <= 0 ? -1 : i).filter(i => i >= 0);
+  const validPrices = validIndices.map(i => prices[i]);
+  const validTimePoints = validIndices.map(i => timePoints[i]);
+  
+  if (validPrices.length < 2) return { slope: 0, intercept: 0, r2: 0, isLogTransformed: useLogTransform };
+
+  // 對價格進行對數轉換（如果啟用）
+  const transformedPrices = useLogTransform 
+    ? validPrices.map(p => Math.log(p)) 
+    : validPrices;
 
   const convertTimeToMonths = (timeStr: string): number => {
     const parts = timeStr.split('-');
@@ -35,34 +48,39 @@ export const calculateTrendLine = (
     }
   };
 
-  const timeValues = timePoints.map(convertTimeToMonths);
+  const timeValues = validTimePoints.map(convertTimeToMonths);
   
   if (timeValues.some(t => isNaN(t))) {
-    console.error('Invalid time values found:', timePoints);
-    return { slope: 0, intercept: 0, r2: 0 };
+    console.error('Invalid time values found:', validTimePoints);
+    return { slope: 0, intercept: 0, r2: 0, isLogTransformed: useLogTransform };
   }
 
   const minTime = Math.min(...timeValues);
   const relativeTime = timeValues.map(t => t - minTime);
 
-  const n = prices.length;
+  const n = transformedPrices.length;
   const sumX = relativeTime.reduce((a, b) => a + b, 0);
-  const sumY = prices.reduce((a, b) => a + b, 0);
-  const sumXY = relativeTime.reduce((sum, x, i) => sum + x * prices[i], 0);
+  const sumY = transformedPrices.reduce((a, b) => a + b, 0);
+  const sumXY = relativeTime.reduce((sum, x, i) => sum + x * transformedPrices[i], 0);
   const sumXX = relativeTime.reduce((sum, x) => sum + x * x, 0);
 
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
   const intercept = (sumY - slope * sumX) / n;
 
   const yMean = sumY / n;
-  const ssTotal = prices.reduce((sum, y) => sum + Math.pow(y - yMean, 2), 0);
-  const ssResidual = prices.reduce((sum, y, i) => {
+  const ssTotal = transformedPrices.reduce((sum, y) => sum + Math.pow(y - yMean, 2), 0);
+  const ssResidual = transformedPrices.reduce((sum, y, i) => {
     const yPred = slope * relativeTime[i] + intercept;
     return sum + Math.pow(y - yPred, 2);
   }, 0);
   const r2 = 1 - ssResidual / ssTotal;
 
-  return { slope, intercept, r2 };
+  return { 
+    slope, 
+    intercept, 
+    r2,
+    isLogTransformed: useLogTransform // 添加標記表示是否使用了對數轉換
+  };
 };
 
 export const processHistoryData = (

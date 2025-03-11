@@ -35,6 +35,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
   const [trendLines, setTrendLines] = useState<TrendLines>({});
   const [communityLocations, setCommunityLocations] = useState<CommunityLocation[]>([]);
+  const [useLogTransform, setUseLogTransform] = useState(false); // 新增：是否使用對數轉換
 
   const processData = () => {
     setIsLoading(true);
@@ -114,7 +115,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       if (communityData.length >= 2) {
         const prices = communityData.map(d => d.price);
         const periods = communityData.map(d => d.period);
-        const trendAnalysis = calculateTrendLine(prices, periods, periodType);
+        const trendAnalysis = calculateTrendLine(prices, periods, periodType, useLogTransform);
         trends[community] = trendAnalysis;
 
         // 找出該社區第一筆和最後一筆實際交易資料的位置
@@ -129,7 +130,12 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
         // 只在有效範圍內計算趨勢線值
         for (let i = startIndex; i <= endIndex; i++) {
           const monthsSinceStart = i - startIndex;
-          history[i][`${community}_trend`] = trendAnalysis.intercept + trendAnalysis.slope * monthsSinceStart;
+          const predictedValue = trendAnalysis.intercept + trendAnalysis.slope * monthsSinceStart;
+          
+          // 如果使用對數轉換，需要將預測值轉換回原始尺度
+          history[i][`${community}_trend`] = trendAnalysis.isLogTransformed 
+            ? Math.exp(predictedValue) 
+            : predictedValue;
         }
 
         // 更新趨勢線相關值
@@ -196,7 +202,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   // 當相關設定變化時重新處理資料
   useEffect(() => {
     processData();
-  }, [data, periodType, startDate, endDate, topN, selectedCommunities, aggregationType, sortCriteria]);
+  }, [data, periodType, startDate, endDate, topN, selectedCommunities, aggregationType, sortCriteria, useLogTransform]);
 
   const handleSettingsChange = (key: string, value: any) => {
     const settingsMap: { [key: string]: (value: any) => void } = {
@@ -208,6 +214,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       selectedCommunities: setSelectedCommunities,
       startDate: setStartDate,
       endDate: setEndDate,
+      useLogTransform: setUseLogTransform, // 新增：處理對數轉換設定
     };
 
     if (key in settingsMap) {
@@ -224,6 +231,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     setTopN(5);
     setSortCriteria('count');
     setSelectedDistricts(availableDistricts);
+    setUseLogTransform(false); // 重置對數轉換設定
   };
 
   return (
@@ -237,6 +245,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
         selectedCommunities={selectedCommunities}
         startDate={startDate}
         endDate={endDate}
+        useLogTransform={useLogTransform}
         availableDistricts={availableDistricts}
         availableCommunities={availableCommunities}
         onSettingsChange={handleSettingsChange}

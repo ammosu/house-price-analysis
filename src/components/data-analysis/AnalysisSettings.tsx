@@ -6,6 +6,7 @@ import { DistrictSelector } from './DistrictSelector';
 import { CommunitySelector } from './CommunitySelector';
 import { DateRangeSelector } from './DateRangeSelector';
 import { SortCriteriaSelector } from './SortCriteriaSelector';
+import { LogTransformToggle } from './LogTransformToggle';
 import { AnalysisSettings as AnalysisSettingsType } from './types';
 
 interface AnalysisSettingsProps extends AnalysisSettingsType {
@@ -24,6 +25,7 @@ export const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
   selectedCommunities,
   startDate,
   endDate,
+  useLogTransform,
   availableDistricts,
   availableCommunities,
   onSettingsChange,
@@ -86,6 +88,11 @@ export const AnalysisSettings: React.FC<AnalysisSettingsProps> = ({
             endDate={endDate}
             onStartDateChange={(date) => onSettingsChange('startDate', date)}
             onEndDateChange={(date) => onSettingsChange('endDate', date)}
+          />
+
+          <LogTransformToggle
+            useLogTransform={useLogTransform}
+            onLogTransformChange={(value) => onSettingsChange('useLogTransform', value)}
           />
         </div>
       </div>
