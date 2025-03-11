@@ -5,6 +5,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CalendarRange, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface DateRangeSelectorProps {
   startDate: string;
@@ -26,11 +28,47 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     (_, i) => String(i + 1).padStart(2, '0')
   );
 
+  // 格式化日期顯示
+  const formatDateDisplay = (dateStr: string) => {
+    if (!dateStr) return '';
+    const [year, month] = dateStr.split('-');
+    return `${year}年${parseInt(month)}月`;
+  };
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="space-y-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+      <div className="flex items-center space-x-2 mb-4">
+        <CalendarRange className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+          時間區間
+        </h3>
+      </div>
+      
+      <div className="flex items-center justify-between mb-4">
+        <div className={cn(
+          "px-3 py-1.5 rounded-lg text-sm",
+          startDate 
+            ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300" 
+            : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+        )}>
+          {startDate ? formatDateDisplay(startDate) : '起始日期'}
+        </div>
+        
+        <ArrowRight className="w-4 h-4 text-gray-400 dark:text-gray-500 mx-2" />
+        
+        <div className={cn(
+          "px-3 py-1.5 rounded-lg text-sm",
+          endDate 
+            ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300" 
+            : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+        )}>
+          {endDate ? formatDateDisplay(endDate) : '結束日期'}
+        </div>
+      </div>
+
       {/* 起始年月選擇 */}
-      <div className="flex-1 space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
           起始年月
         </label>
         <div className="flex gap-2">
@@ -42,7 +80,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
                 onStartDateChange(`${year}-${month}`);
               }}
             >
-              <SelectTrigger className="h-10 text-base w-full">
+              <SelectTrigger className="h-9 text-sm w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <SelectValue placeholder="選擇年份" />
               </SelectTrigger>
               <SelectContent 
@@ -70,7 +108,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
                 onStartDateChange(`${year}-${month}`);
               }}
             >
-              <SelectTrigger className="h-10 text-base w-full">
+              <SelectTrigger className="h-9 text-sm w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <SelectValue placeholder="選擇月份" />
               </SelectTrigger>
               <SelectContent 
@@ -92,8 +130,8 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
       </div>
 
       {/* 結束年月選擇 */}
-      <div className="flex-1 space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
           結束年月
         </label>
         <div className="flex gap-2">
@@ -108,7 +146,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
                 }
               }}
             >
-              <SelectTrigger className="h-10 text-base w-full">
+              <SelectTrigger className="h-9 text-sm w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <SelectValue placeholder="選擇年份" />
               </SelectTrigger>
               <SelectContent 
@@ -143,7 +181,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
                 }
               }}
             >
-              <SelectTrigger className="h-10 text-base w-full">
+              <SelectTrigger className="h-9 text-sm w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <SelectValue placeholder="選擇月份" />
               </SelectTrigger>
               <SelectContent 

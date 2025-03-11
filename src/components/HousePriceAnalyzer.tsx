@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '@tremor/react';
 import { parse, ParseResult } from 'papaparse';
 import { FileUploader } from './FileUploader';
 import { DataAnalysis } from './DataAnalysis';
 import { HousePriceData, ProcessedData } from '@/types/house';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, FileCheck } from "lucide-react";
+import { AlertCircle, FileCheck, Database, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const HousePriceAnalyzer: React.FC = () => {
   const [data, setData] = useState<HousePriceData[]>([]);
@@ -35,6 +35,7 @@ const HousePriceAnalyzer: React.FC = () => {
 
               if (cleanData.length === 0) {
                 setError('無有效的資料記錄，請確認檔案格式是否正確');
+                setIsLoading(false);
                 return;
               }
 
@@ -58,42 +59,81 @@ const HousePriceAnalyzer: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <Card className="bg-white dark:bg-gray-800 shadow-lg transition-all duration-200 hover:shadow-xl">
-        <div className="space-y-4">
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl transition-all duration-300 hover:shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div className="p-6 space-y-6">
           <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                數據上傳
-              </h2>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
-                請上傳房價交易CSV檔案以開始分析
-              </p>
-            </div>
-            {data.length > 0 && (
-              <div className="flex items-center text-green-600 dark:text-green-400">
-                <FileCheck className="w-5 h-5 mr-2" />
-                <span className="text-sm">已上傳 {data.length} 筆資料</span>
+            <div className="flex items-start space-x-4">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+                <Database className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-            )}
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  數據上傳
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  請上傳房價交易CSV檔案以開始分析
+                </p>
+              </div>
+            </div>
+            
+            <AnimatePresence>
+              {data.length > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center px-3 py-1.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full"
+                >
+                  <FileCheck className="w-4 h-4 mr-2" />
+                  <span className="text-sm font-medium">已上傳 {data.length} 筆資料</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <FileUploader onFileUpload={handleFileUpload} />
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>錯誤</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <Alert variant="destructive" className="mt-4 border border-red-200 dark:border-red-800">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>錯誤</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </Card>
+        
+        {data.length > 0 && (
+          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              資料已準備就緒，可以開始分析
+            </div>
+            <div className="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium">
+              <span>查看分析結果</span>
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </div>
+          </div>
+        )}
+      </div>
       
-      {data.length > 0 && (
-        <div className="transition-all duration-500 animate-fadeIn">
-          <DataAnalysis data={data} />
-        </div>
-      )}
+      <AnimatePresence>
+        {data.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="transition-all duration-500"
+          >
+            <DataAnalysis data={data} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

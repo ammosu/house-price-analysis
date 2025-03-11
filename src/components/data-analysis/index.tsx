@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, LineChart as LineChartIcon, Table as TableIcon, MapIcon } from "lucide-react";
+import { BarChart3, LineChart as LineChartIcon, Table as TableIcon, MapIcon, Loader2 } from "lucide-react";
 import _ from 'lodash';
 import { cn } from '@/lib/utils';
 import { DataAnalysisProps, CommunityStats, PriceHistory, TrendLines, CommunityLocation, SortCriteria } from './types';
@@ -11,6 +11,7 @@ import { PriceTrendChart } from './PriceTrendChart';
 import { TrendLineChart } from './TrendLineChart';
 import { CommunityStatsTable } from './CommunityStatsTable';
 import { CommunityMapView } from './CommunityMapView';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   calculateBasicStats, 
   processHistoryData, 
@@ -35,7 +36,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
   const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
   const [trendLines, setTrendLines] = useState<TrendLines>({});
   const [communityLocations, setCommunityLocations] = useState<CommunityLocation[]>([]);
-  const [useLogTransform, setUseLogTransform] = useState(false); // 新增：是否使用對數轉換
+  const [useLogTransform, setUseLogTransform] = useState(false);
 
   const processData = () => {
     setIsLoading(true);
@@ -66,6 +67,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     
     if (filteredData.length === 0) {
       console.log('No data after filtering');
+      setIsLoading(false);
       return;
     }
 
@@ -153,7 +155,11 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
 
     setTrendLines(trends);
     setCommunityStats(stats);
-    setIsLoading(false);
+    
+    // 延遲一點時間以顯示加載動畫
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
   };
 
   // 當資料變化時更新行政區列表
@@ -214,7 +220,7 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
       selectedCommunities: setSelectedCommunities,
       startDate: setStartDate,
       endDate: setEndDate,
-      useLogTransform: setUseLogTransform, // 新增：處理對數轉換設定
+      useLogTransform: setUseLogTransform,
     };
 
     if (key in settingsMap) {
@@ -231,11 +237,19 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
     setTopN(5);
     setSortCriteria('count');
     setSelectedDistricts(availableDistricts);
-    setUseLogTransform(false); // 重置對數轉換設定
+    setUseLogTransform(false);
+  };
+
+  // 定義標籤圖標和顏色
+  const tabConfig = {
+    trend: { icon: <LineChartIcon className="h-4 w-4" />, color: 'bg-blue-500', label: '價格趨勢' },
+    trendline: { icon: <BarChart3 className="h-4 w-4" />, color: 'bg-green-500', label: '趨勢線' },
+    stats: { icon: <TableIcon className="h-4 w-4" />, color: 'bg-purple-500', label: '統計資料' },
+    map: { icon: <MapIcon className="h-4 w-4" />, color: 'bg-amber-500', label: '地圖檢視' },
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <AnalysisSettings
         periodType={periodType}
         aggregationType={aggregationType}
@@ -252,113 +266,107 @@ export const DataAnalysis: React.FC<DataAnalysisProps> = ({ data }) => {
         onReset={handleReset}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto bg-gray-100 dark:bg-gray-800 p-1 rounded-lg gap-1">
-          <TabsTrigger
-            value="trend"
-            className={cn(
-              "space-x-2 transition-all duration-200",
-              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
-              "data-[state=active]:shadow-sm",
-              "rounded-md px-4 py-2"
-            )}
-          >
-            <LineChartIcon className="h-4 w-4" />
-            <span>價格趨勢</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="trendline"
-            className={cn(
-              "space-x-2 transition-all duration-200",
-              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
-              "data-[state=active]:shadow-sm",
-              "rounded-md px-4 py-2"
-            )}
-          >
-            <BarChart3 className="h-4 w-4" />
-            <span>趨勢線</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="stats"
-            className={cn(
-              "space-x-2 transition-all duration-200",
-              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
-              "data-[state=active]:shadow-sm",
-              "rounded-md px-4 py-2"
-            )}
-          >
-            <TableIcon className="h-4 w-4" />
-            <span>統計資料</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="map"
-            className={cn(
-              "space-x-2 transition-all duration-200",
-              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700",
-              "data-[state=active]:shadow-sm",
-              "rounded-md px-4 py-2"
-            )}
-          >
-            <MapIcon className="h-4 w-4" />
-            <span>地圖檢視</span>
-          </TabsTrigger>
-        </TabsList>
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-0">
+          <div className="px-6 pt-6 pb-0">
+            <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl gap-1">
+              {Object.entries(tabConfig).map(([key, config]) => (
+                <TabsTrigger
+                  key={key}
+                  value={key}
+                  className={cn(
+                    "flex items-center space-x-2 transition-all duration-300 py-2.5",
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
+                    "data-[state=active]:shadow-sm",
+                    "rounded-lg"
+                  )}
+                >
+                  <div className={cn(
+                    "flex items-center justify-center w-6 h-6 rounded-full",
+                    activeTab === key 
+                      ? `text-white ${config.color}` 
+                      : "text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-600"
+                  )}>
+                    {config.icon}
+                  </div>
+                  <span>{config.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
-        <TabsContent value="trend" className="relative min-h-[400px]">
-          {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <PriceTrendChart
-              priceHistory={priceHistory}
-              selectedCommunities={selectedCommunities}
-              availableCommunities={availableCommunities}
-            />
-          )}
-        </TabsContent>
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              {isLoading && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm z-10"
+                >
+                  <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-3" />
+                  <p className="text-gray-600 dark:text-gray-300">資料處理中...</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        <TabsContent value="trendline" className="relative min-h-[400px]">
-          {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <TrendLineChart
-              priceHistory={priceHistory}
-              selectedCommunities={selectedCommunities}
-              availableCommunities={availableCommunities}
-              trendLines={trendLines}
-            />
-          )}
-        </TabsContent>
+            <TabsContent value="trend" className="m-0 p-0">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <PriceTrendChart
+                  priceHistory={priceHistory}
+                  selectedCommunities={selectedCommunities}
+                  availableCommunities={availableCommunities}
+                />
+              </motion.div>
+            </TabsContent>
 
-        <TabsContent value="stats" className="relative min-h-[400px]">
-          {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <CommunityStatsTable
-              communityStats={communityStats}
-              availableCommunities={availableCommunities}
-            />
-          )}
-        </TabsContent>
+            <TabsContent value="trendline" className="m-0 p-0">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <TrendLineChart
+                  priceHistory={priceHistory}
+                  selectedCommunities={selectedCommunities}
+                  availableCommunities={availableCommunities}
+                  trendLines={trendLines}
+                />
+              </motion.div>
+            </TabsContent>
 
-        <TabsContent value="map" className="relative min-h-[400px]">
-          {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <CommunityMapView
-              locations={communityLocations}
-              selectedCommunities={selectedCommunities}
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="stats" className="m-0 p-0">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CommunityStatsTable
+                  communityStats={communityStats}
+                  availableCommunities={availableCommunities}
+                />
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="map" className="m-0 p-0">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CommunityMapView
+                  locations={communityLocations}
+                  selectedCommunities={selectedCommunities}
+                />
+              </motion.div>
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 };
